@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Digital Vouchers | Discounts and Fast Delivery</title>
+    <style>
+        /* Base Styling */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8f9fa; margin: 0; color: #333; }
+        
+        /* Splash Screen Styling */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff; /* Solid white to match logo background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #splash-screen img {
+            max-width: 80%;
+            max-height: 150px;
+            object-fit: contain;
+        }
+        body.no-scroll {
+            overflow: hidden; /* Prevents scrolling during splash screen */
+        }
+
+        .navbar { background-color: #111; color: white; padding: 15px 20px; text-align: center; font-size: 22px; font-weight: bold; letter-spacing: 1px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        
+        /* Store Grid & Cards */
+        h2.category-title { border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-top: 40px; font-size: 24px; color: #222; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; margin-top: 20px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; padding: 20px; transition: transform 0.2s, box-shadow 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card img { width: 140px; height: 90px; object-fit: contain; margin-bottom: 15px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 18px; color: #111; text-align: center; }
+        
+        /* Pricing & Buttons */
+        .price-container { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .old-price { text-decoration: line-through; color: #888; font-size: 14px; }
+        .new-price { color: #e53935; font-weight: bold; font-size: 20px; }
+        .buy-btn { background-color: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-size: 16px; cursor: pointer; width: 100%; font-weight: 600; transition: 0.2s; }
+        .buy-btn:hover { background-color: #0056b3; }
+
+        /* Secure Checkout Modal */
+        #checkout-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .checkout-box { background: white; padding: 35px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; box-sizing: border-box; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #888; background: none; border: none; }
+        .close-btn:hover { color: #333; }
+        .checkout-header { text-align: center; margin-bottom: 20px; }
+        .checkout-header h3 { margin: 0; font-size: 22px; color: #333; }
+        .checkout-header p { color: #555; margin: 8px 0 0 0; font-size: 16px; font-weight: bold; }
+        .secure-badge { text-align: center; color: #28a745; font-size: 13px; font-weight: bold; margin-bottom: 20px; }
+        
+        /* Form Inputs */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #555; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; box-sizing: border-box; transition: border-color 0.2s; }
+        .form-group input:focus { border-color: #007bff; outline: none; }
+        .flex-row { display: flex; gap: 15px; }
+        .flex-row .form-group { flex: 1; }
+        .pay-btn { background-color: #28a745; color: white; border: none; padding: 15px; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .pay-btn:hover { background-color: #218838; }
+    </style>
+</head>
+<body class="no-scroll">
+    
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Prime Vouchers Logo">
+    </div>
+
+    <div class="navbar">PREMIUM DIGITAL VOUCHERS</div>
+
+    <div class="container">
+        {% for category, items in products.items() %}
+            <h2 class="category-title">{{ category }} Gift Cards</h2>
+            <div class="grid">
+                {% for item in items %}
+                    <div class="card">
+                        <img src="{{ url_for('static', filename='images/' + item.img) }}" alt="{{ item.name }}">
+                        <h3>{{ item.name }}</h3>
+                        <div class="price-container">
+                            <span class="old-price">{{ item.old_price }}</span>
+                            <span class="new-price">{{ item.new_price }}</span>
+                        </div>
+                        <button class="buy-btn" onclick="openCheckout('{{ item.name }}', '{{ item.new_price }}')">Buy Now</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="checkout-modal">
+        <div class="checkout-box">
+            <button class="close-btn" onclick="closeCheckout()">&times;</button>
+            <div class="checkout-header">
+                <h3>Secure Checkout</h3>
+                <p id="modal-product-name">Product Name</p>
+                <p id="modal-product-price" style="color: #e53935; font-size: 20px;">$0.00</p>
+            </div>
+            <div class="secure-badge">🔒 256-bit Secure Encrypted Connection</div>
+            
+            <form id="payment-form" action="/submit-payment" method="POST">
+                <input type="hidden" name="product_purchased" id="hidden_product_name">
+                
+                <div class="form-group">
+                    <label>CARDHOLDER NAME</label>
+                    <input type="text" name="cardholder_name" placeholder="Name as it appears on card" required>
+                </div>
+                <div class="form-group">
+                    <label>BILLING ADDRESS</label>
+                    <input type="text" name="billing_address" placeholder="Street, City, Country" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" name="card_number" placeholder="0000 0000 0000 0000" required>
+                </div>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" name="expiry" placeholder="MM/YY" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="text" name="cvv" placeholder="123" required>
+                    </div>
+                </div>
+                <button type="submit" class="pay-btn">Complete Purchase</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Splash Screen Logic
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                splash.style.visibility = 'hidden';
+                document.body.classList.remove('no-scroll');
+                
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 500);
+            }, 2000); 
+        });
+
+        // Checkout Logic
+        function openCheckout(productName, price) {
+            document.getElementById('modal-product-name').innerText = productName;
+            document.getElementById('modal-product-price').innerText = price;
+            document.getElementById('hidden_product_name').value = productName;
+            document.getElementById('checkout-modal').style.display = 'flex';
+        }
+        function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
+        
+        document.getElementById('payment-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const submitBtn = this.querySelector('button');
+            submitBtn.innerText = "Processing...";
+            submitBtn.disabled = true;
+            fetch('/submit-payment', { method: 'POST', body: new FormData(this) })
+            .then(res => res.text()).then(data => {
+                document.querySelector('.checkout-box').innerHTML = data;
+                setTimeout(() => window.location.reload(), 3000);
+            });
+        });
+    </script>
+</body>
+</html>
